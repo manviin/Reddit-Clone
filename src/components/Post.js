@@ -23,44 +23,36 @@ function Post({post}){
     }
   }, [post]);
 
-  function handleDecrease(){ // function to handle decreasing vote count when user clicks on "minus" button//
-    const newCount= voteCount-1;
+  function countUpdate(event){ // to update count state whenever user clicks on vote button(plus/minus)
+    const name = event.currentTarget.getAttribute('name');
+    let newCount;
+    if (name === "Plus") {
+      newCount = voteCount + 1;
+    } else if (name === "Minus") {
+      newCount = voteCount - 1;
+    }
     setVoteCount(newCount);
-    dispatch(updateCount({id:post.id,count:newCount}));
+    dispatch(updateCount({ id: post.id, count: newCount }));
+  };
+
+  function handleReply(){  // to toggle Reply Component
+    setShowReply(!showReply);
   }
 
-  function handleIncrease(){ // function to handle increasing vote count when user clicks on "plus" button//
-    const newCount= voteCount+1;
-    setVoteCount(newCount);
-    dispatch(updateCount({id:post.id,count:newCount}));
+  function handleDelete(){  //to toggle Modal Component
+    setDelete(!isDelete);
   }
 
-  function handleReply(){  // to show Reply Component
-    setShowReply(true);
-  }
-  function handleSendReply(){ // to close Reply component when reply is sent
-    setShowReply(false);
-  }
-
-  function handleDelete(){  //to show Modal Component
-    setDelete(true);
- }
-
- function handleYesDelete(){ // calling dispatch function of delete comment and deleting the comment from database//
+  function handleYesDelete(){ // calling dispatch function of delete comment and deleting the comment from database//
     dispatch(deleteComment({id:post.id}));
-    setDelete(false);
+    setDelete(!isDelete);
  }
 
- function handleNoCancel(){  // setting show Modal Component state as false
-    setDelete(false);
- }
- 
  function formatDate(dateString) { //function to format the post's date
   const date = new Date(dateString);
   const options = { day: '2-digit', month: 'long', year: 'numeric' };
   return date.toLocaleDateString('en-US', options);
-}
-
+ }
 
  const renderComments = (comments, level = 1) => { // recursive function to traverse through all the comments under each post//
         return comments.map((comment) => (
@@ -76,9 +68,9 @@ if (!post) { // adding case when the posts are not rendered
 return <div key={post.id} class="flex bg-white pl-10 pr-0 shadow-lg rounded-lg mx-4 md:mx-auto mt-10 max-w-md md:max-w-2xl ">
          <div class="flex items-start px-4 py-6">
          <div className='flex flex-col items-center mb-2 mr-5 px-2 py-1 bg-blue-100 rounded'>
-          <FaMinus onClick={handleDecrease} className="text-blue-500 cursor-pointer hover:text-blue-700 mb-1" />
+          <FaMinus name='Minus' onClick={countUpdate} className="text-blue-500 cursor-pointer hover:text-blue-700 mb-1" />
           <span className="text-blue-500 font-bold">{voteCount}</span>
-         <FaPlus onClick={handleIncrease} className="text-blue-500 cursor-pointer hover:text-blue-700 mt-1" />
+         <FaPlus name='Plus' onClick={countUpdate} className="text-blue-500 cursor-pointer hover:text-blue-700 mt-1" />
          </div>
          <div class="">
            <div class="flex items-center justify-between">
@@ -109,9 +101,9 @@ return <div key={post.id} class="flex bg-white pl-10 pr-0 shadow-lg rounded-lg m
             {post.message}
          </p>
          {showReply&& //using conditional rendering to show Reply Component
-         <Reply onReply={handleSendReply} id={post.id} />} 
+         <Reply onReply={handleReply} id={post.id} />} 
          {isDelete&&   // using conditonal rendering to show Modal Component//
-          <Modal onYesDelete={handleYesDelete} onNoCancel={handleNoCancel}/>}
+          <Modal onYesDelete={handleYesDelete} onNoCancel={handleDelete}/>}
          <div class="mt-4">
          {renderComments(post.comments)}  
          </div>
